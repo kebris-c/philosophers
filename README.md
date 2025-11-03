@@ -1,4 +1,4 @@
-# philosophersphilosophers
+# philosophers
 
 philosophers is a project that simulates the classical Dining Philosophers problem, focusing on concurrency, synchronization, and avoiding deadlocks. The goal is to implement multiple philosophers (processes or threads) who alternately think, eat, and sleep while sharing forks, without causing starvation or race conditions.
 
