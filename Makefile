@@ -6,7 +6,7 @@
 #    By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/08 13:07:54 by kebris-c          #+#    #+#              #
-#    Updated: 2025/11/03 20:56:57 by kebris-c         ###   ########.fr        #
+#    Updated: 2025/11/24 15:22:03 by kebris-c         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,7 +45,7 @@ N_B_GDB		= $(P_B_GDB).a
 # 🔧 Compiler and flags
 #
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -Wall -Wextra -Werror -pthread -fsanitize=thread
 CEXTRAFLAGS	= \
 			$(CFLAGS) \
 			-MMD \
@@ -118,7 +118,8 @@ SRCS	= \
 		  philos_actions.c \
 		  philos_routine.c \
 		  philosophers.c \
-		  utils.c
+		  utils0.c \
+		  utils1.c
 OBJS	= $(patsubst %.c,$(OBJS_DIR)%.o,$(SRCS))
 DEPS	= $(patsubst $(OBJS_DIR)%.o,$(DEPS_DIR)%.d,$(OBJS))
 # And if there is bonus...
@@ -251,92 +252,60 @@ gdb_bonus: $(N_B_GDB) $(P_B_GDB)
 #	Headers compilers
 #
 $(NAME): $(OBJS) | setup
-	@if [ ! -f $(NAME) ] || [ $(NAME) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(NAME) $(OBJS); \
-		echo "✅ $(NAME) built with main sources"; \
-	else \
-		echo "⏩ $(NAME) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(NAME) $(OBJS); \
+	echo "✅ $(NAME) built with main sources";
 
 $(N_BONUS): $(B_OBJS) | setup
-	@if [ ! -f $(N_BONUS) ] || [ $(N_BONUS) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_BONUS) $(B_OBJS); \
-		echo "✅ $(N_BONUS) built with bonus sources"; \
-	else \
-		echo "⏩ $(N_BONUS) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_BONUS) $(B_OBJS); \
+	echo "✅ $(N_BONUS) built with bonus sources";
 
 $(N_RIGOR): $(OBJS) | setup
-	@if [ ! -f $(N_RIGOR) ] || [ $(N_RIGOR) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_RIGOR) $(OBJS); \
-		echo "✅ $(N_RIGOR) built with main sources"; \
-	else \
-		echo "⏩ $(N_RIGOR) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_RIGOR) $(OBJS); \
+	echo "✅ $(N_RIGOR) built with main sources";
 
 $(N_B_RIGOR): $(B_OBJS) | setup
-	@if [ ! -f $(N_B_RIGOR) ] || [ $(N_B_RIGOR) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_B_RIGOR) $(OBJS); \
-		echo "✅ $(N_B_RIGOR) built with bonus sources"; \
-	else \
-		echo "⏩ $(N_B_RIGOR) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_B_RIGOR) $(B_OBJS); \
+	echo "✅ $(N_B_RIGOR) built with bonus sources";
 
 $(N_DBG): $(OBJS) | setup
-	@if [ ! -f $(N_DBG) ] || [ $(N_DBG) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_DBG) $(OBJS); \
-		echo "✅ $(N_DBG) built with main sources"; \
-	else \
-		echo "⏩ $(N_DBG) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_DBG) $(OBJS); \
+	echo "✅ $(N_DBG) built with main sources";
 
 $(N_B_DBG): $(B_OBJS) | setup
-	@if [ ! -f $(N_B_DBG) ] || [ $(N_B_DBG) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_B_DBG) $(OBJS); \
-		echo "✅ $(N_B_DBG) built with bonus sources"; \
-	else \
-		echo "⏩ $(N_B_DBG) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_B_DBG) $(B_OBJS); \
+	echo "✅ $(N_B_DBG) built with bonus sources";
 
 $(N_GDB): $(OBJS) | setup
-	@if [ ! -f $(N_GDB) ] || [ $(N_GDB) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_GDB) $(OBJS); \
-		echo "✅ $(N_GDB) built with bonus sources"; \
-	else \
-		echo "⏩ $(N_GDB) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_GDB) $(OBJS); \
+	echo "✅ $(N_GDB) built with bonus sources";
 
 $(N_B_GDB): $(B_OBJS) | setup
-	@if [ ! -f $(N_B_GDB) ] || [ $(N_B_GDB) -ot $? ]; then \
-		if [ -d $(LIB_DIR) ]; then \
-			$(MAKE) -C $(LIB_DIR); \
-		fi; \
-		$(AR) $(N_B_GDB) $(B_OBJS); \
-		echo "✅ $(N_B_GDB) built with bonus sources"; \
-	else \
-		echo "⏩ $(N_B_GDB) already up to date"; \
-	fi
+	if [ -d $(LIB_DIR) ]; then \
+		$(MAKE) -C $(LIB_DIR); \
+	fi; \
+	$(AR) $(N_B_GDB) $(B_OBJS); \
+	echo "✅ $(N_B_GDB) built with bonus sources";
 
 #	Objects & bonus objects Compilers
 #
@@ -388,12 +357,6 @@ re_dbg_bonus: fclean dbg_bonus
 #------------------------------------------------#
 
 $(PROJECT): $(NAME)
-	@if [ ! -f $(PROJECT) ] || [ $(PROJECT) -ot $(NAME) ]; then \
-		echo "🔄 Building $(PROJECT)..."; \
-	else \
-		echo "⏩ $(PROJECT) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm
 	$(call COMPILE_PROJECT,$(CFLAGS),$(NAME),$(PROJECT))
 	@if [ -f $(PROJECT) ]; then \
@@ -403,12 +366,6 @@ $(PROJECT): $(NAME)
 	fi
 
 $(P_BONUS): $(N_BONUS)
-	@if [ ! -f $(P_BONUS) ] || [ $(P_BONUS) -ot $(N_BONUS) ]; then \
-		echo "🔄 Building $(P_BONUS)..."; \
-	else \
-		echo "⏩ $(P_BONUS) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm_bonus
 	$(call COMPILE_PROJECT,$(CFLAGS),$(N_BONUS),$(P_BONUS))
 	@if [ -f $(P_BONUS) ]; then \
@@ -418,12 +375,6 @@ $(P_BONUS): $(N_BONUS)
 	fi
 
 $(P_RIGOR): $(N_RIGOR)
-	@if [ ! -f $(P_RIGOR) ] || [ $(P_RIGOR) -ot $(N_RIGOR) ]; then \
-		echo "🔄 Building $(P_RIGOR)..."; \
-	else \
-		echo "⏩ $(P_RIGOR) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm
 	$(call COMPILE_PROJECT,$(CEXTRAFLAGS),$(N_RIGOR),$(P_RIGOR))
 	@if [ -f $(P_RIGOR) ]; then \
@@ -433,12 +384,6 @@ $(P_RIGOR): $(N_RIGOR)
 	fi
 
 $(P_B_RIGOR): $(N_B_RIGOR)
-	@if [ ! -f $(P_B_RIGOR) ] || [ $(P_B_RIGOR) -ot $(N_B_RIGOR) ]; then \
-		echo "🔄 Building $(P_B_RIGOR)..."; \
-	else \
-		echo "⏩ $(P_B_RIGOR) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm_bonus
 	$(call COMPILE_PROJECT,$(CEXTRAFLAGS),$(N_B_RIGOR),$(P_B_RIGOR))
 	@if [ -f $(P_B_RIGOR) ]; then \
@@ -448,12 +393,6 @@ $(P_B_RIGOR): $(N_B_RIGOR)
 	fi
 
 $(P_GDB): $(N_GDB)
-	@if [ ! -f $(P_GDB) ] || [ $(P_GDB) -ot $(N_GDB) ]; then \
-		echo "🔄 Building $(P_GDB)..."; \
-	else \
-		echo "⏩ $(P_GDB) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm
 	$(call COMPILE_PROJECT,$(GDBFLAGS),$(N_GDB),$(P_GDB))
 	@if [ -f $(P_GDB) ]; then \
@@ -463,12 +402,6 @@ $(P_GDB): $(N_GDB)
 	fi
 
 $(P_B_GDB): $(N_B_GDB)
-	@if [ ! -f $(P_B_GDB) ] || [ $(P_B_GDB) -ot $(N_B_GDB) ]; then \
-		echo "🔄 Building $(P_B_GDB)..."; \
-	else \
-		echo "⏩ $(P_B_GDB) already up to update"; \
-		exit 1; \
-	fi
 	$(MAKE) norm
 	$(call COMPILE_PROJECT,$(GDBFLAGS),$(N_B_GDB),$(P_B_GDB))
 	@if [ -f $(P_B_GDB) ]; then \
@@ -478,38 +411,30 @@ $(P_B_GDB): $(N_B_GDB)
 	fi
 
 $(P_DBG): $(N_DBG)
-	@if [ ! -f $(P_DBG) ] || [ $(P_DBG) -ot $(N_DBG) ]; then \
-		echo "🔄 Building $(P_DBG)..."; \
-		if [ -d $(LIB_DIR) ]; then \
-			$(CC) $(N_DBG) $(MLXFLAG) -L$(LIB_DIR) -lft -o $(P_DBG); \
-		else \
-			$(CC) $(N_DBG) $(MLXFLAG) -o $(P_DBG); \
-		fi; \
-		if [ -f $(P_DBG) ]; then \
-			echo "✅ $(P_DBG) linked"; \
-		else \
-			echo "⚠️ Failed to build $(P_DBG)"; \
-		fi; \
+	echo "🔄 Building $(P_DBG)..."; \
+	if [ -d $(LIB_DIR) ]; then \
+		$(CC) $(N_DBG) $(MLXFLAG) -L$(LIB_DIR) -lft -o $(P_DBG); \
 	else \
-		echo "⏩ $(P_DBG) already up to update"; \
-	fi
+		$(CC) $(N_DBG) $(MLXFLAG) -o $(P_DBG); \
+	fi; \
+	if [ -f $(P_DBG) ]; then \
+		echo "✅ $(P_DBG) linked"; \
+	else \
+		echo "⚠️ Failed to build $(P_DBG)"; \
+	fi;
 
 $(P_B_DBG): $(N_B_DBG)
-	@if [ ! -f $(P_B_DBG) ] || [ $(P_B_DBG) -ot $(N_B_DBG) ]; then \
-		echo "🔄 Building $(P_B_DBG)..."; \
-		if [ -d $(LIB_DIR) ]; then \
-			$(CC) $(N_B_DBG) $(MLXFLAG) -L$(LIB_DIR) -lft -o $(P_B_DBG); \
-		else \
-			$(CC) $(N_B_DBG) $(MLXFLAG) -o $(P_B_DBG); \
-		fi; \
-		if [ -f $(P_B_DBG) ]; then \
-			echo "✅ $(P_B_DBG) linked"; \
-		else \
-			echo "⚠️ Failed to build $(P_B_DBG)"; \
-		fi; \
+	echo "🔄 Building $(P_B_DBG)..."; \
+	if [ -d $(LIB_DIR) ]; then \
+		$(CC) $(N_B_DBG) $(MLXFLAG) -L$(LIB_DIR) -lft -o $(P_B_DBG); \
 	else \
-		echo "⏩ $(P_B_DBG) already up to update"; \
-	fi
+		$(CC) $(N_B_DBG) $(MLXFLAG) -o $(P_B_DBG); \
+	fi; \
+	if [ -f $(P_B_DBG) ]; then \
+		echo "✅ $(P_B_DBG) linked"; \
+	else \
+		echo "⚠️ Failed to build $(P_B_DBG)"; \
+	fi;
 
 #------------------------------------------------#
 #   NORMINETTE & LEAKS                           #
