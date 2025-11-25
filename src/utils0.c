@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 17:57:47 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/12 17:40:09 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/11/25 15:31:53 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,5 +96,10 @@ void	free_table(t_table *table)
 	pthread_mutex_destroy(&table->print_lock);
 	pthread_mutex_destroy(&table->state_lock);
 	if (table->philos)
+	{
+		i = 0;
+		while (i < table->n_philos)
+			pthread_mutex_destroy(&table->philos[i++].lock);
 		free(table->philos);
+	}
 }

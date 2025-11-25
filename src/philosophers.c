@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 17:51:21 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/24 16:09:14 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/11/25 15:30:01 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ static int	init_philos(t_table *table)
 		table->philos[i].table = table;
 		table->philos[i].left_fork = &table->forks[i];
 		table->philos[i].right_fork = &table->forks[(i + 1) % table->n_philos];
+		pthread_mutex_init(&table->philos[i].lock, NULL);
 		i++;
 	}
 	return (EXIT_SUCCESS);
@@ -84,6 +85,10 @@ static int	philosophers(t_table *table)
 		if (pthread_create(&table->philos[i].thread, NULL, &philos_routine, \
 				&table->philos[i]) != 0)
 			return (exit_fail("pthread_create philo", i, table));
+		if (table->n_philos > 50)
+			usleep(500);
+		else
+			usleep(100);
 		i++;
 	}
 	if (pthread_create(&monitor, NULL, &monitor_routine, table) != 0)

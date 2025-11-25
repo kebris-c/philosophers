@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 20:51:44 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/24 19:22:45 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/11/25 18:54:56 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,27 @@ static int	dead_checker(t_table *table)
 {
 	int		i;
 	long	last_meal;
+	long	now;
 
 	i = 0;
 	while (i < table->n_philos)
 	{
-		pthread_mutex_lock(&table->state_lock);
+		now = get_time(table).rel_ms;
+		pthread_mutex_lock(&table->philos[i].lock);
 		last_meal = table->philos[i].last_meal;
-		if (get_time(table).rel_ms - last_meal > table->time_to_die)
+		pthread_mutex_unlock(&table->philos[i].lock);
+		if (now - last_meal > table->time_to_die)
 		{
+			pthread_mutex_lock(&table->state_lock);
 			table->finished = 1;
 			pthread_mutex_unlock(&table->state_lock);
 			pthread_mutex_lock(&table->print_lock);
-			printf("%ld\t%d\tdied\n", get_time(table).rel_ms, \
-					table->philos[i].id);
+			printf("%ld\t%d\tdied\n", now, table->philos[i].id);
 			pthread_mutex_unlock(&table->print_lock);
 			return (true);
 		}
-		pthread_mutex_unlock(&table->state_lock);
-		i++;
+		if ((++i & 0xF) == 0)
+			now = get_time(table).rel_ms;
 	}
 	return (false);
 }
@@ -42,23 +45,22 @@ static int	food_is_gone(t_table *table)
 {
 	int			i;
 	int			meals;
+	long		now;
 
-	pthread_mutex_lock(&table->state_lock);
 	i = 0;
 	while (i < table->n_philos)
 	{
+		pthread_mutex_lock(&table->philos[i].lock);
 		meals = table->philos[i].meals;
+		pthread_mutex_unlock(&table->philos[i].lock);
 		if (meals < table->must_eat)
-		{
-			pthread_mutex_unlock(&table->state_lock);
 			return (false);
-		}
 		i++;
 	}
-	pthread_mutex_unlock(&table->state_lock);
+	now = get_time(table).rel_ms;
 	pthread_mutex_lock(&table->print_lock);
 	printf("%ld Simulation ended: all philosophers ate %d times\n", \
-			get_time(table).rel_ms, table->must_eat);
+			now, table->must_eat);
 	pthread_mutex_unlock(&table->print_lock);
 	pthread_mutex_lock(&table->state_lock);
 	table->finished = 1;
@@ -75,12 +77,16 @@ void	*monitor_routine(void *arg)
 	{
 		pthread_mutex_lock(&table->state_lock);
 		if (table->finished)
-			return (pthread_mutex_unlock(&table->state_lock), NULL);
+		{
+			pthread_mutex_unlock(&table->state_lock);
+			return (NULL);
+		}
 		pthread_mutex_unlock(&table->state_lock);
 		if (dead_checker(table))
 			return (NULL);
 		if (table->must_eat != -1 && food_is_gone(table))
 			return (NULL);
+		usleep(200);
 	}
 	return (NULL);
 }

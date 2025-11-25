@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 17:49:39 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/24 19:36:11 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/11/25 18:59:22 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct s_philo
 	int			has_left;
 	int			has_right;
 	long		last_meal;
+	t_mutex		lock;
 	t_mutex		*left_fork;
 	t_mutex		*right_fork;
 	t_table		*table;
@@ -96,47 +97,33 @@ static inline int	is_dead(t_philo *philo)
 	return (finished);
 }
 
-static inline void	take_a_fork(t_philo *philo, char *fork)
+static inline void	take_a_fork(t_philo *philo, int right)
 {
-	if (ft_strcmp(fork, (char *)"right") == 0)
+	if (right)
 	{
-		if (is_dead(philo))
-			return ;
 		pthread_mutex_lock(philo->right_fork);
 		philo->has_right = 1;
 	}
-	else if (ft_strcmp(fork, (char *)"left") == 0)
+	else
 	{
-		if (is_dead(philo))
-			return ;
 		pthread_mutex_lock(philo->left_fork);
 		philo->has_left = 1;
 	}
 }
 
-static inline void	drop_a_fork(t_philo *philo, char *fork)
+static inline void	drop_a_fork(t_philo *philo, int right)
 {
-	if (ft_strcmp(fork, (char *)"right") == 0)
+	if (right)
 	{
 		if (philo->has_right)
 			pthread_mutex_unlock(philo->right_fork);
 		philo->has_right = 0;
-		pthread_mutex_lock(&philo->table->print_lock);
-		if (!is_dead(philo))
-			printf("%ld\t%d\tdropped a right fork\n", \
-				get_time(philo->table).rel_ms, philo->id);
-		pthread_mutex_unlock(&philo->table->print_lock);
 	}
-	else if (ft_strcmp(fork, (char *)"left") == 0)
+	else
 	{
 		if (philo->has_left)
 			pthread_mutex_unlock(philo->left_fork);
 		philo->has_left = 0;
-		pthread_mutex_lock(&philo->table->print_lock);
-		if (!is_dead(philo))
-			printf("%ld\t%d\tdropped a left fork\n", \
-				get_time(philo->table).rel_ms, philo->id);
-		pthread_mutex_unlock(&philo->table->print_lock);
 	}
 }
 
