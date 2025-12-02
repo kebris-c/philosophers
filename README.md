@@ -60,6 +60,9 @@ Prevents deadlocks and data races.
 
 Fully compliant with the 42 Norm.
 
+Notes
+This code was checked with extern project. Credits for 42-philosophers-tester from dantonik repo
+
 👨‍💻 Author
 
 By kebris-c
