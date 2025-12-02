@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 16:13:04 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/25 18:53:30 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/12/02 19:41:41 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	ft_usleep(long ms, t_table *table)
 {
 	long	start;
 	long	now;
+	long	rem;
 
 	start = get_time(table).rel_ms;
 	while (1)
@@ -52,6 +53,37 @@ void	ft_usleep(long ms, t_table *table)
 			return ;
 		}
 		pthread_mutex_unlock(&table->state_lock);
-		usleep(200);
+		rem = ms - (now - start);
+		if (rem > 10)
+			usleep((rem - 5) * 750);
+		else
+			usleep(250);
 	}
+}
+
+void	print_action(t_table *table, int id, const char *msg)
+{
+	long	now;
+
+	now = get_time(table).rel_ms;
+	pthread_mutex_lock(&table->state_lock);
+	if (table->finished)
+	{
+		pthread_mutex_unlock(&table->state_lock);
+		return ;
+	}
+	pthread_mutex_lock(&table->print_lock);
+	pthread_mutex_unlock(&table->state_lock);
+	printf("%ld\t%d\t%s\n", now, id, msg);
+	pthread_mutex_unlock(&table->print_lock);
+}
+
+void	print_force(t_table *table, int id, const char *msg)
+{
+	long	now;
+
+	now = get_time(table).rel_ms;
+	pthread_mutex_lock(&table->print_lock);
+	printf("%ld\t%d\t%s\n", now, id, msg);
+	pthread_mutex_unlock(&table->print_lock);
 }

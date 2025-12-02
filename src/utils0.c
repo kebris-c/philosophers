@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 17:57:47 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/25 15:31:53 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/12/02 18:54:13 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,9 @@ int	exit_fail(char *flag, int threads, t_table *table)
 {
 	if (threads > 0)
 	{
+		pthread_mutex_lock(&table->state_lock);
 		table->finished = 1;
+		pthread_mutex_unlock(&table->state_lock);
 		while (--threads >= 0)
 			pthread_join(table->philos[threads].thread, NULL);
 	}
@@ -99,7 +101,7 @@ void	free_table(t_table *table)
 	{
 		i = 0;
 		while (i < table->n_philos)
-			pthread_mutex_destroy(&table->philos[i++].lock);
+			pthread_mutex_destroy(&table->philos[i++].meal_lock);
 		free(table->philos);
 	}
 }

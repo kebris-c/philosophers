@@ -6,7 +6,7 @@
 #    By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/08 13:07:54 by kebris-c          #+#    #+#              #
-#    Updated: 2025/11/24 15:22:03 by kebris-c         ###   ########.fr        #
+#    Updated: 2025/12/02 19:07:00 by kebris-c         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,37 +45,37 @@ N_B_GDB		= $(P_B_GDB).a
 # 🔧 Compiler and flags
 #
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -pthread -fsanitize=thread
+CFLAGS		= -Wall -Werror -Wextra -pthread -fsanitize=thread
 CEXTRAFLAGS	= \
-			$(CFLAGS) \
-			-MMD \
-			-MP \
-			-std=c17 \
-			-Wpedantic \
-			-Wconversion \
-			-Wsign-conversion \
-			-Wshadow \
-			-Wstrict-prototypes \
-			-Wpointer-arith \
-			-Wcast-align \
-			-Wunreachable-code \
-			-Winit-self \
-			-Wswitch-enum \
-			-Wfloat-equal \
-			-Wformat=2 \
-			-Wmissing-prototypes \
-			-Wmissing-declarations \
-			-Wdouble-promotion \
-			-Wundef \
-			-Wbad-function-cast \
-			-Winline -Wvla \
-			-Wno-unused-parameter \
-			-Wno-missing-field-initializers \
-			-fstrict-aliasing \
-			-fstack-protector-strong \
-			-D_FORTIFY_SOURCE=2 \
-			-g3 \
-			-O0
+			  $(CFLAGS) \
+			  -MMD \
+			  -MP \
+			  -std=c17 \
+			  -Wpedantic \
+			  -Wconversion \
+			  -Wsign-conversion \
+			  -Wshadow \
+			  -Wstrict-prototypes \
+			  -Wpointer-arith \
+			  -Wcast-align \
+			  -Wunreachable-code \
+			  -Winit-self \
+			  -Wswitch-enum \
+			  -Wfloat-equal \
+			  -Wformat=2 \
+			  -Wmissing-prototypes \
+			  -Wmissing-declarations \
+			  -Wdouble-promotion \
+			  -Wundef \
+			  -Wbad-function-cast \
+			  -Winline -Wvla \
+			  -Wno-unused-parameter \
+			  -Wno-missing-field-initializers \
+			  -fstrict-aliasing \
+			  -fstack-protector-strong \
+			  -D_FORTIFY_SOURCE=2 \
+			  -g3 \
+			  -O0
 GDBFLAGS	= \
 			  $(CFLAGS) \
 			  -g3 \
@@ -262,7 +262,7 @@ $(N_BONUS): $(B_OBJS) | setup
 	if [ -d $(LIB_DIR) ]; then \
 		$(MAKE) -C $(LIB_DIR); \
 	fi; \
-	$(AR) $(N_BONUS) $(B_OBJS); \
+	$(AR) $(N_BONUS) $(B_OBJS); \198
 	echo "✅ $(N_BONUS) built with bonus sources";
 
 $(N_RIGOR): $(OBJS) | setup
@@ -312,9 +312,9 @@ $(N_B_GDB): $(B_OBJS) | setup
 $(OBJS_DIR)%.o: $(SRC_DIR)%.c | setup
 	@echo "🔨 Compiling $<..."
 	@if [ -d $(LIB_DIR) ]; then \
-		$(MAKE) -C $(LIB_DIR); \
+		$(MAKE) $(CFLAGS) -C $(LIB_DIR); \
 	fi
-	@$(CC) $(CFLAGS) -MMD -MP $(HEADERS) -c $< -o $@
+	@$(CC) -MMD -MP $(HEADERS) -c $< -o $@
 	@mv $(OBJS_DIR)$*.d $(DEPS_DIR)
 
 $(B_OBJS_DIR)%.o: $(B_SRC_DIR)%.c | setup

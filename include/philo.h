@@ -6,7 +6,7 @@
 /*   By: kebris-c <kebris-c@student.42madrid.c      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 17:49:39 by kebris-c          #+#    #+#             */
-/*   Updated: 2025/11/25 18:59:22 by kebris-c         ###   ########.fr       */
+/*   Updated: 2025/12/02 19:43:54 by kebris-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,10 @@ typedef struct s_table
 	int				n_philos;
 	int				must_eat;
 	int				finished;
+	long			start_time;
 	long			time_to_die;
 	long			time_to_eat;
 	long			time_to_sleep;
-	long			start_time;
 	t_mutex			*forks;
 	t_mutex			print_lock;
 	t_mutex			state_lock;
@@ -51,7 +51,7 @@ typedef struct s_philo
 	int			has_left;
 	int			has_right;
 	long		last_meal;
-	t_mutex		lock;
+	t_mutex		meal_lock;
 	t_mutex		*left_fork;
 	t_mutex		*right_fork;
 	t_table		*table;
@@ -73,6 +73,8 @@ int		ft_strcmp(char *s1, char *s2);
 void	free_table(t_table *table);
 void	ft_putstr_fd(char *str, int std);
 void	ft_usleep(long ms, t_table *table);
+void	print_action(t_table *table, int id, const char *msg);
+void	print_force(t_table *table, int id, const char *msg);
 size_t	ft_strlen(const char *str);
 t_time	get_time(t_table *table);
 //	  philos_actions file
@@ -85,6 +87,10 @@ void	drop_forks(t_philo *philo);
 void	*monitor_routine(void *arg);
 void	*philos_routine(void *arg);
 long	ft_atol(const char *str);
+/*
+//	  philosophers.c
+void	print_dbg(t_philo *philo);
+*/
 
 //	Inlines
 static inline int	is_dead(t_philo *philo)
@@ -101,28 +107,40 @@ static inline void	take_a_fork(t_philo *philo, int right)
 {
 	if (right)
 	{
+		if (philo->has_right)
+			return ;
 		pthread_mutex_lock(philo->right_fork);
 		philo->has_right = 1;
 	}
 	else
 	{
+		if (philo->has_left)
+			return ;
 		pthread_mutex_lock(philo->left_fork);
 		philo->has_left = 1;
 	}
+	if (is_dead(philo))
+	{
+		drop_forks(philo);
+		return ;
+	}
+	print_action(philo->table, philo->id, "has taken a fork");
 }
 
 static inline void	drop_a_fork(t_philo *philo, int right)
 {
 	if (right)
 	{
-		if (philo->has_right)
-			pthread_mutex_unlock(philo->right_fork);
+		if (!philo->has_right)
+			return ;
+		pthread_mutex_unlock(philo->right_fork);
 		philo->has_right = 0;
 	}
 	else
 	{
-		if (philo->has_left)
-			pthread_mutex_unlock(philo->left_fork);
+		if (!philo->has_left)
+			return ;
+		pthread_mutex_unlock(philo->left_fork);
 		philo->has_left = 0;
 	}
 }
